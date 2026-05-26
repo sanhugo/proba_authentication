@@ -6,7 +6,6 @@ public enum Role implements GrantedAuthority {
     SUPERADMIN, //владелец системы
     ADMIN, //администратор системы
     USER, //пользователь (студент),
-    PARENT, //родитель
     MODERATOR, //модератор пробника
     REFEREE, //эксперт
     OWNER; //владелец помещения
