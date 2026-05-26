@@ -1,7 +1,7 @@
 openapi: 3.0.1
 info:
   title: Proba auth microservice
-  description: Authentication serivce for Proba system
+  description: Authentication service for Proba system
   contact:
     name: Alexandr Cherensov
     email: sanhugo4u@hotmail.com
@@ -11,11 +11,15 @@ servers:
 
 tags:
   - name: Registration
-    description: Ручки регистрации новых пользователей
+    description: Ручки регистрации новых пользователей / Endpoints for registration new users
   - name: Authentication
-    description: Ручки хода в систему и выдачи токена
+    description: Ручки входа в систему и выдачи токена / Endpoints for generating tokens
   - name: Superadmin
-    description: Возможности супер-администратора
+    description: Возможности супер-администратора / Opportunities for superadmin
+  - name: Internal_auth
+    description: Ручки внутреннего пользования (не запрашиваемые напрямую пользователем) / Internal API
+  - name: Password
+    description: Ручки сброса пароля / Endpoints for changing password
 
 paths:
   /register:
@@ -34,12 +38,208 @@ paths:
           $ref: "#/components/responses/Success"
         500:
           $ref: "#/components/responses/ErrorResponse"
-
-
-
+  /role/add:
+    post:
+      tags:
+        - Superadmin
+      summary: Добавление роли пользователю
+      operationId: addRoleToUser
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserNewRoleDTO"
+      responses:
+        200:
+          $ref: "#/components/responses/Success"
+        403:
+          $ref: "#/components/responses/Forbidden"
+        500:
+          $ref: "#/components/responses/ErrorResponse"
+  /login:
+    post:
+      tags:
+        - Authentication
+      summary: Авторизация и получение токена
+      operationId: getToken
+      security: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserLoginDTO"
+      responses:
+        200:
+          description: Вход в систему
+          headers:
+            Set-Cookie:
+              description: Set refresh token to HTTPOnly Cookie which is not available for frontend
+              schema:
+                type: string
+                example: "refresh_token=etd...; Path=/ HttpOnly; Secure SameSite=Strict; Max-Age=604800"
+          content:
+              application/json:
+                schema:
+                  $ref: "#/components/responses/Token"
+        500:
+          $ref: "#/components/responses/ErrorResponse"
+  /logout:
+    post:
+      tags:
+        - Authentication
+      summary: Выход из системы
+      operationId: logoutUser
+      security:
+        - CookieAuth: []
+      responses:
+        200:
+          description: Successfully logged out
+          headers:
+            Set-Cookie:
+              description: Cookie Deletion instructions
+              schema:
+                type: string
+                example: "refresh_token=; Path=/; Max-Age=0; HttpOnly; Secure; SameSite=Strict"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/responses/Success"
+        500:
+          $ref: "#/components/responses/ErrorResponse"
+  /refresh:
+    post:
+      tags:
+        - Internal_auth
+      summary: Вызов для обновления токенов
+      operationId: updateTokens
+      security:
+        - CookieAuth: []
+      responses:
+        200:
+          description: Токены обновлены успешно / Tokens updated successfully
+          headers:
+            Set-Cookie:
+              description: Set refresh token to HTTPOnly Cookie which is not available for frontend
+              schema:
+                type: string
+                example: "refresh_token=etd...; Path=/ HttpOnly; Secure SameSite=Strict; Max-Age=604800"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/responses/Token"
+        500:
+          $ref: "#/components/responses/ErrorResponse"
+  /clear_password:
+    post:
+      tags:
+        - Password
+      summary: Сброс пароля (запрос кода на почту)
+      operationId: clearPassword
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ResetEmailDTO"
+      responses:
+        200:
+          $ref: "#/components/responses/Success"
+        404:
+          $ref: "#/components/responses/ErrorResponse"
+        500:
+          $ref: "#/components/responses/ErrorResponse"
+  /change_password:
+    post:
+      tags:
+        - Password
+      summary: Смена пароля (принимает код подтверждения и новый пароль)
+      operationId: changePassword
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CodeAndPasswordDTO"
+      responses:
+        200:
+          $ref: "#/components/responses/Success"
+        404:
+          $ref: "#/components/responses/ErrorResponse"
+        500:
+          $ref: "#/components/responses/ErrorResponse"
+  /confirm_registration:
+    post:
+      tags:
+        - Registration
+      summary: Эндпоинт для подтверждения регистрации (нужен код для завершения регистрации)
+      operationId: confirmRegistration
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApprovalCodeDTO"
+      responses:
+        200:
+          $ref: "#/components/responses/Success"
+        404:
+          $ref: "#/components/responses/ErrorResponse"
+        500:
+          $ref: "#/components/responses/ErrorResponse"
+  /role/remove:
+    post:
+      tags:
+        - Superadmin
+      summary: Отзыв роли пользователя
+      operationId: removeRole
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserAndRoleForRemovalDTO"
+      responses:
+        200:
+          $ref: "#/components/responses/Success"
+        403:
+          $ref: "#/components/responses/Forbidden"
+        500:
+          $ref: "#/components/responses/ErrorResponse"
 
 components:
   schemas:
+    ApprovalCodeDTO:
+      type: object
+      description: DTO с кодом подтверждения регистрации
+      properties:
+        code:
+          type: string
+          minLength: 8
+    CodeAndPasswordDTO:
+      type: object
+      description: DTO с новым паролем и кодом подтверждения нового пароля
+      properties:
+        code:
+          type: string
+          minLength: 8
+        password:
+          type: string
+          nullable: false
+          minLength: 9
+    ResetEmailDTO:
+      type: object
+      description: DTO с почтовым адресом пользователя, для которого нужно сбросить пароль
+      properties:
+        user_email:
+          type: string
+          format: email
+          minLength: 4
+    UserAndRoleForRemovalDTO:
+      type: object
+      description: DTO с пользователем и ролью на удаление
+      properties:
+        user_id:
+          type: string
+          format: uuid
+          minLength: 9
+        role:
+          type: string
     UserRegistrationDTO:
       type: object
       description: DTO с регистрационными данными пользователя
@@ -56,6 +256,18 @@ components:
           type: string
           nullable: false
           minLength: 9
+    UserLoginDTO:
+      type: object
+      description: DTO для входа пользователя в систему и получения JWT-токена
+      properties:
+        login:
+          type: string
+          nullable: false
+          minLength: 1
+        password:
+          type: string
+          nullable: false
+          minLength: 8
     Error:
       type: object
       description: Error DTO
@@ -67,8 +279,30 @@ components:
           type: string
           format: date-time
           description: время возникновения ошибки
-
+    UserNewRoleDTO:
+      type: object
+      description: DTO с новой ролью пользователя
+      properties:
+        user_id:
+          type: string
+          format: uuid
+          minLength: 1
+        role:
+          type: string
+          minLength: 2
   responses:
+    Forbidden:
+      description: Запрещенный вызов
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+    Token:
+      description: Access-токен
+      content:
+        application/json:
+          schema:
+            type: string
     Success:
       description: Успешно
       content:
