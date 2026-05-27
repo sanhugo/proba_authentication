@@ -3,7 +3,7 @@ info:
   title: Proba auth microservice
   description: Authentication service for Proba system
   contact:
-    name: Alexandr Cherensov
+    name: Alexandr Cherentsov
     email: sanhugo4u@hotmail.com
   version: 0.1.0
 servers:
