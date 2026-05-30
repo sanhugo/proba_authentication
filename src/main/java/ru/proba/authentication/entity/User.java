@@ -1,7 +1,21 @@
 package ru.proba.authentication.entity;
 
-import jakarta.persistence.*;
+import com.github.f4b6a3.uuid.UuidCreator;
+
+import jakarta.persistence.CollectionTable;
+import jakarta.persistence.Column;
+import jakarta.persistence.ElementCollection;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.Table;
+
+import lombok.AccessLevel;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -9,22 +23,29 @@ import ru.proba.authentication.enums.Role;
 
 import java.util.Collection;
 import java.util.Set;
+import java.util.UUID;
 
 @Entity
 @Getter
 @Setter
 @Table(name ="users")
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class User implements UserDetails {
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    @Column(unique = true, nullable = false)
-    private long id;
+    @Column(columnDefinition = "uuid")
+    private final UUID id=UuidCreator.getTimeOrderedEpoch();
 
     @Column(unique = true, nullable = false)
     private String login;
 
     @Column(unique = true, nullable = false)
+    private String email;
+
+    @Column(nullable = false)
     private String password;
+
+    @Column(nullable = false)
+    private boolean isBlocked=false;
 
     @ElementCollection(fetch = FetchType.LAZY)
     @CollectionTable(
@@ -37,6 +58,12 @@ public class User implements UserDetails {
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return roles;
+    }
+
+    @Override
+    public boolean isAccountNonLocked()
+    {
+        return !isBlocked;
     }
 
     @Override
