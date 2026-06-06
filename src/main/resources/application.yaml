@@ -2,13 +2,22 @@ spring:
   application:
     name: authentication
   datasource:
-    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:auth}
-    username: ${DB_USER:postgres}
-    password: ${DB_PASS}
+    url: jdbc:postgresql://${PG_HOST:localhost}:${PG_PORT:5432}/${PG_NAME:auth}
+    username: ${PG_USER:postgres}
+    password: ${PG_PASS}
   jpa:
     hibernate:
       ddl-auto: none
     open-in-view: false
+  docker:
+    compose:
+      file: docker/docker-compose.yaml
+  liquibase:
+    change-log: db_migrations/changelog_master.yaml
+  data:
+    redis:
+      host: localhost
+      port: ${CASH_PORT:6379}
 
 server:
   port: ${SERVER_PORT:8081}

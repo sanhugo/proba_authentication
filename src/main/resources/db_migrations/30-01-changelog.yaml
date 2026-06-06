@@ -84,17 +84,17 @@ databaseChangeLog:
             indexName: idx_users_login
             columns:
               column:
-                login
+                name: login
         - createIndex:
             tableName: users
             indexName: idx_users_email
             columns:
               column:
-                email
+                name: email
         - createIndex:
             tableName: user_roles
             indexName: idx_roles_user_id
             columns:
               column:
-                user_id
+                name: user_id
 

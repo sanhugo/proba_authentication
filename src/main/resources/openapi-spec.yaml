@@ -80,7 +80,7 @@ paths:
           content:
               application/json:
                 schema:
-                  $ref: "#/components/responses/Token"
+                  $ref: "#/components/schemas/Token"
         500:
           $ref: "#/components/responses/ErrorResponse"
   /logout:
@@ -100,10 +100,6 @@ paths:
               schema:
                 type: string
                 example: "refresh_token=; Path=/; Max-Age=0; HttpOnly; Secure; SameSite=Strict"
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/responses/Success"
         500:
           $ref: "#/components/responses/ErrorResponse"
   /refresh:
@@ -126,7 +122,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/responses/Token"
+                $ref: "#/components/schemas/Token"
         500:
           $ref: "#/components/responses/ErrorResponse"
   /clear_password:
@@ -204,6 +200,14 @@ paths:
 
 components:
   schemas:
+    Token:
+      type: object
+      description: Access-токен
+      properties:
+        token:
+          type: string
+      required:
+        - token
     ApprovalCodeDTO:
       type: object
       description: DTO с кодом подтверждения регистрации
@@ -211,6 +215,8 @@ components:
         code:
           type: string
           minLength: 8
+      required:
+        - code
     CodeAndPasswordDTO:
       type: object
       description: DTO с новым паролем и кодом подтверждения нового пароля
@@ -220,8 +226,10 @@ components:
           minLength: 8
         password:
           type: string
-          nullable: false
           minLength: 9
+      required:
+        - code
+        - password
     ResetEmailDTO:
       type: object
       description: DTO с почтовым адресом пользователя, для которого нужно сбросить пароль
@@ -230,6 +238,8 @@ components:
           type: string
           format: email
           minLength: 4
+      required:
+        - user_email
     UserAndRoleForRemovalDTO:
       type: object
       description: DTO с пользователем и ролью на удаление
@@ -240,6 +250,9 @@ components:
           minLength: 9
         role:
           type: string
+      required:
+        - user_id
+        - role
     UserRegistrationDTO:
       type: object
       description: DTO с регистрационными данными пользователя
@@ -256,6 +269,10 @@ components:
           type: string
           nullable: false
           minLength: 9
+      required:
+        - login
+        - email
+        - password
     UserLoginDTO:
       type: object
       description: DTO для входа пользователя в систему и получения JWT-токена
@@ -268,6 +285,9 @@ components:
           type: string
           nullable: false
           minLength: 8
+      required:
+        - login
+        - password
     Error:
       type: object
       description: Error DTO
@@ -279,6 +299,9 @@ components:
           type: string
           format: date-time
           description: время возникновения ошибки
+      required:
+        - description
+        - time
     UserNewRoleDTO:
       type: object
       description: DTO с новой ролью пользователя
@@ -290,6 +313,9 @@ components:
         role:
           type: string
           minLength: 2
+      required:
+        - user_id
+        - role
   responses:
     Forbidden:
       description: Запрещенный вызов
@@ -297,12 +323,6 @@ components:
         application/json:
           schema:
             $ref: "#/components/schemas/Error"
-    Token:
-      description: Access-токен
-      content:
-        application/json:
-          schema:
-            type: string
     Success:
       description: Успешно
       content:
