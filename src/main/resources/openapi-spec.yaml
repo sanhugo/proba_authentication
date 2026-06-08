@@ -91,6 +91,14 @@ paths:
       operationId: logoutUser
       security:
         - CookieAuth: []
+      parameters:
+        - name: refresh_token
+          in: cookie
+          required: true
+          description: JWT refresh token
+          schema:
+            type: string
+            format: jwt
       responses:
         200:
           description: Successfully logged out
@@ -110,6 +118,14 @@ paths:
       operationId: updateTokens
       security:
         - CookieAuth: []
+      parameters:
+        - name: refresh_token
+          in: cookie
+          required: true
+          description: JWT refresh token
+          schema:
+            type: string
+            format: jwt
       responses:
         200:
           description: Токены обновлены успешно / Tokens updated successfully

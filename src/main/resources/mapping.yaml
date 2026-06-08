@@ -1,0 +1,7 @@
+openapi-processor-mapping: v17
+
+options:
+  package-name: ru.proba.authentication.generated
+  bean-validation: jakarta
+  model-type: record
+  response-entity: true

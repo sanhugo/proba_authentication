@@ -2,7 +2,7 @@ plugins {
     id 'java'
     id 'org.springframework.boot' version '4.0.6'
     id 'io.spring.dependency-management' version '1.1.7'
-    id 'org.openapi.generator' version '7.22.0'
+    id 'io.openapiprocessor.openapi-processor' version '2026.2'
 }
 
 group = 'ru.proba'
@@ -39,23 +39,28 @@ dependencies {
     testAnnotationProcessor 'org.projectlombok:lombok'
 }
 
-openApiGenerate {
-    generatorName = "spring"
-    inputSpec = "$rootDir/src/main/resources/openapi-spec.yaml"
+// 2. Correct Configuration Block
+openapiProcessor {
+    apiPath "$projectDir/src/main/resources/openapi-spec.yaml"
 
-    outputDir = "${layout.buildDirectory.get().asFile}/generated/openapi"
+    // Configure the Spring processor
+    spring {
+        processor 'io.openapiprocessor:openapi-processor-spring:2026.3'
+        targetDir layout.buildDirectory.dir("generated/sources/openapi")
 
-    configOptions = [
-            useRecords: "true",
-            interfaceOnly: "true",
-            java21: "true",
-            serializableModel: "true",
-            dateLibrary: "java8",
-            openApiNullable: "false",
-            useNotNullAnnotation: "true",
-            useJakartaEe: "true"
-    ]
+        mapping "$projectDir/src/main/resources/mapping.yaml"
+    }
 }
-//tasks.named('test') {
-//    useJUnitPlatform()
-//}
+
+sourceSets {
+    main {
+        java {
+            srcDir layout.buildDirectory.dir("generated/sources/openapi")
+        }
+    }
+}
+
+// 3. Ensure the code is generated before compilation
+tasks.named("compileJava") {
+    dependsOn "processSpring"
+}
