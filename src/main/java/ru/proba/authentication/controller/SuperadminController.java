@@ -8,12 +8,12 @@ import ru.proba.authentication.generated.model.UserNewRoleDto;
 @RestController
 public class SuperadminController implements SuperadminApi {
     @Override
-    public String addRoleToUser(UserNewRoleDto body) {
-        return null;
+    public void addRoleToUser(UserNewRoleDto body) {
+
     }
 
     @Override
-    public String removeRole(UserAndRoleForRemovalDto body) {
-        return null;
+    public void removeRole(UserAndRoleForRemovalDto body) {
+
     }
 }

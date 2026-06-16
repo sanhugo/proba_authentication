@@ -15,12 +15,10 @@ import ru.proba.authentication.generated.model.UserRegistrationDto;
 public class RegistrationController implements RegistrationApi {
 
     @Override
-    public String registerUser(UserRegistrationDto body) {
-        return null;
+    public void registerUser(UserRegistrationDto body) {
     }
 
     @Override
-    public String confirmRegistration(ApprovalCodeDto body) {
-        return null;
+    public void confirmRegistration(ApprovalCodeDto body) {
     }
 }

@@ -8,12 +8,10 @@ import ru.proba.authentication.generated.model.ResetEmailDto;
 @RestController
 public class PasswordController implements PasswordApi {
     @Override
-    public String clearPassword(ResetEmailDto body) {
-        return null;
+    public void clearPassword(ResetEmailDto body) {
     }
 
     @Override
-    public String changePassword(CodeAndPasswordDto body) {
-        return null;
+    public void changePassword(CodeAndPasswordDto body) {
     }
 }

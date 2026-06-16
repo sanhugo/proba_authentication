@@ -22,3 +22,12 @@ spring:
 server:
   port: ${SERVER_PORT:8081}
 
+jwt:
+  refresh:
+    private-key: ${RSA_PRIVATE_KEY}
+    public-key: ${RSA_PUBLIC_KEY}
+    refresh-expiration: 14
+  access:
+    secret: ${HMAC_KEY}
+    access-expiration: 10
+

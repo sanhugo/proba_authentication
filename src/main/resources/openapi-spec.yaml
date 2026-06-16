@@ -35,7 +35,7 @@ paths:
               $ref: "#/components/schemas/UserRegistrationDTO"
       responses:
         201:
-          $ref: "#/components/responses/Success"
+          description: Created
         500:
           $ref: "#/components/responses/ErrorResponse"
   /role/add:
@@ -51,7 +51,7 @@ paths:
               $ref: "#/components/schemas/UserNewRoleDTO"
       responses:
         200:
-          $ref: "#/components/responses/Success"
+          description: Success
         403:
           $ref: "#/components/responses/Forbidden"
         500:
@@ -73,14 +73,10 @@ paths:
           description: Вход в систему
           headers:
             Set-Cookie:
-              description: Set refresh token to HTTPOnly Cookie which is not available for frontend
+              description: Set both tokens to HTTPOnly Cookie
               schema:
                 type: string
                 example: "refresh_token=etd...; Path=/ HttpOnly; Secure SameSite=Strict; Max-Age=604800"
-          content:
-              application/json:
-                schema:
-                  $ref: "#/components/schemas/Token"
         500:
           $ref: "#/components/responses/ErrorResponse"
   /logout:
@@ -96,6 +92,13 @@ paths:
           in: cookie
           required: true
           description: JWT refresh token
+          schema:
+            type: string
+            format: jwt
+        - name: access_token
+          in: cookie
+          required: true
+          description: JWT Access token
           schema:
             type: string
             format: jwt
@@ -131,14 +134,10 @@ paths:
           description: Токены обновлены успешно / Tokens updated successfully
           headers:
             Set-Cookie:
-              description: Set refresh token to HTTPOnly Cookie which is not available for frontend
+              description: Set both tokens to HTTPOnly Cookie
               schema:
                 type: string
                 example: "refresh_token=etd...; Path=/ HttpOnly; Secure SameSite=Strict; Max-Age=604800"
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Token"
         500:
           $ref: "#/components/responses/ErrorResponse"
   /clear_password:
@@ -154,7 +153,7 @@ paths:
               $ref: "#/components/schemas/ResetEmailDTO"
       responses:
         200:
-          $ref: "#/components/responses/Success"
+          description: Success
         404:
           $ref: "#/components/responses/ErrorResponse"
         500:
@@ -172,7 +171,7 @@ paths:
               $ref: "#/components/schemas/CodeAndPasswordDTO"
       responses:
         200:
-          $ref: "#/components/responses/Success"
+          description: Success
         404:
           $ref: "#/components/responses/ErrorResponse"
         500:
@@ -190,7 +189,7 @@ paths:
               $ref: "#/components/schemas/ApprovalCodeDTO"
       responses:
         200:
-          $ref: "#/components/responses/Success"
+          description: Success
         404:
           $ref: "#/components/responses/ErrorResponse"
         500:
@@ -208,7 +207,7 @@ paths:
               $ref: "#/components/schemas/UserAndRoleForRemovalDTO"
       responses:
         200:
-          $ref: "#/components/responses/Success"
+          description: Success
         403:
           $ref: "#/components/responses/Forbidden"
         500:

@@ -17,6 +17,7 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.jspecify.annotations.NullMarked;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import ru.proba.authentication.enums.Role;
@@ -56,6 +57,7 @@ public class User implements UserDetails {
     private Set<Role> roles;
 
     @Override
+    @NullMarked
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return roles;
     }
@@ -67,11 +69,13 @@ public class User implements UserDetails {
     }
 
     @Override
+    @NullMarked
     public String getPassword() {
         return password;
     }
 
     @Override
+    @NullMarked
     public String getUsername() {
         return login;
     }

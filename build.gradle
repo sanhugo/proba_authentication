@@ -28,8 +28,14 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-webmvc'
     implementation 'org.springframework.boot:spring-boot-starter-data-redis'
     implementation 'org.springframework.boot:spring-boot-starter-liquibase'
+    implementation 'io.jsonwebtoken:jjwt-api:0.13.0'
+    implementation 'org.mapstruct:mapstruct:1.6.3'
+    annotationProcessor 'org.mapstruct:mapstruct-processor:1.6.3'
+
     compileOnly 'org.projectlombok:lombok'
     developmentOnly 'org.springframework.boot:spring-boot-docker-compose'
+    runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.13.0'
+    runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.13.0'
     runtimeOnly 'org.postgresql:postgresql'
     annotationProcessor 'org.projectlombok:lombok'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
@@ -39,7 +45,6 @@ dependencies {
     testAnnotationProcessor 'org.projectlombok:lombok'
 }
 
-// 2. Correct Configuration Block
 openapiProcessor {
     apiPath "$projectDir/src/main/resources/openapi-spec.yaml"
 
@@ -47,7 +52,6 @@ openapiProcessor {
     spring {
         processor 'io.openapiprocessor:openapi-processor-spring:2026.3'
         targetDir layout.buildDirectory.dir("generated/sources/openapi")
-
         mapping "$projectDir/src/main/resources/mapping.yaml"
     }
 }
@@ -60,7 +64,7 @@ sourceSets {
     }
 }
 
-// 3. Ensure the code is generated before compilation
+//Ensure the code is generated before compilation
 tasks.named("compileJava") {
     dependsOn "processSpring"
 }
