@@ -1,6 +1,7 @@
 package ru.proba.authentication.utils;
 
 import lombok.experimental.UtilityClass;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -32,7 +33,7 @@ public class HMACKeyGen {
 //            System.out.println("📁 File location: " + envPath.toAbsolutePath());
 
         } catch (Exception e) {
-            e.printStackTrace();
+            ExceptionUtils.rethrow(e);
         }
     }
 }

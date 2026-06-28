@@ -7,12 +7,15 @@ import org.jspecify.annotations.NullMarked;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.proba.authentication.entity.User;
+import ru.proba.authentication.enums.Role;
+import ru.proba.authentication.generated.model.UserRegistrationDto;
 import ru.proba.authentication.mapper.AccessTokenInfoMapper;
-import ru.proba.authentication.records.AccessTokenInfo;
-import ru.proba.authentication.records.RefreshTokenInfo;
 import ru.proba.authentication.repository.UserRepository;
+
 
 @Service("userDetailsService")
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
@@ -20,6 +23,7 @@ import ru.proba.authentication.repository.UserRepository;
 public class CustomUserDetailsService implements UserDetailsService {
     UserRepository userRepository;
     AccessTokenInfoMapper mapper;
+    BCryptPasswordEncoder encoder;
 
     @Override
     @NullMarked
@@ -29,19 +33,22 @@ public class CustomUserDetailsService implements UserDetailsService {
         return org.springframework.security.core.userdetails.User
                 .withUsername(username)
                 .password(user.getPassword())
-                .roles(String.valueOf(user.getRoles()))
+                .roles(user.getRoles().stream().map(Enum::name).toArray(String[]::new))
                 .build();
     }
 
-    public AccessTokenInfo getInfo(String username){
-        User u = userRepository.findIDAndRolesByUsername(username).orElseThrow(
-                () -> new UsernameNotFoundException("No user found with username: "+username)
-        );
-        return mapper.fromUser(u);
+    public boolean hasAccount(UserRegistrationDto body) {
+        return userRepository.countByLoginOrEmail(body.login(), body.email()) > 0;
     }
-    public RefreshTokenInfo getInfoForRefresh(String username){
-        return userRepository.findIdByLogin(username).orElseThrow(
-                () -> new UsernameNotFoundException("No user found with username: "+username)
-        );
+
+    @Transactional
+    public void registerUser(UserRegistrationDto body) {
+        User u = User.builder()
+                .email(body.email())
+                .login(body.login())
+                .password(encoder.encode(body.password()))
+                .build();
+        u.getRoles().add(Role.USER);
+        userRepository.save(u);
     }
 }

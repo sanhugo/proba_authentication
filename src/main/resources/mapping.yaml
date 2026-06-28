@@ -5,3 +5,9 @@ options:
   bean-validation: jakarta
   model-type: record
   response-entity: true
+
+map:
+  types:
+    - type: string:uuid => java.util.UUID
+    - type: string:role => ru.proba.authentication.enums.Role
+  result: org.springframework.http.ResponseEntity

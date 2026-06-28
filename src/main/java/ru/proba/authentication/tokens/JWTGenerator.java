@@ -29,8 +29,7 @@ public class JWTGenerator {
     RedisTemplate<String, String> redisTemplate;
     CustomUserDetailsService userDetailsService;
 
-    public String generateAccess(String username){
-        AccessTokenInfo ati = userDetailsService.getInfo(username);
+    public String generateAccess(AccessTokenInfo ati){
         SecretKey key = Keys.hmacShaKeyFor(config.getSecret().getBytes(StandardCharsets.UTF_8));
         long nowMillis = System.currentTimeMillis();
         long expMillis = nowMillis + 1000 * 60 * config.getAccessExpiration();
@@ -43,9 +42,8 @@ public class JWTGenerator {
                 .compact();
     }
 
-    public String generateRefresh(String username, String device_id) {
+    public String generateRefresh(RefreshTokenInfo rti, String device_id) {
         try {
-            RefreshTokenInfo rti = userDetailsService.getInfoForRefresh(username);
             PublicKey key = KeyTransmitter.getPublicKeyFromString(refreshConfig.getPrivateKey());
             long nowMillis = System.currentTimeMillis();
             long expMillis = nowMillis + 1000L * 60 * 60 * 24 * refreshConfig.getRefreshExpiration();

@@ -18,6 +18,8 @@ spring:
     redis:
       host: localhost
       port: ${CASH_PORT:6379}
+  mail:
+    host:
 
 server:
   port: ${SERVER_PORT:8081}

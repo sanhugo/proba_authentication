@@ -13,7 +13,10 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.Table;
 
+import jakarta.persistence.Version;
 import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -23,6 +26,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import ru.proba.authentication.enums.Role;
 
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 
@@ -30,11 +34,17 @@ import java.util.UUID;
 @Getter
 @Setter
 @Table(name ="users")
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class User implements UserDetails {
     @Id
     @Column(columnDefinition = "uuid")
-    private final UUID id=UuidCreator.getTimeOrderedEpoch();
+    private UUID id=UuidCreator.getTimeOrderedEpoch();
+
+    @Version //optimistic locking in case roles and passwords don't often change
+    @Column(nullable = false)
+    private Integer version = 0;
 
     @Column(unique = true, nullable = false)
     private String login;
@@ -48,13 +58,16 @@ public class User implements UserDetails {
     @Column(nullable = false)
     private boolean isBlocked=false;
 
+    @Column(nullable = false)
+    private boolean isEnabled=false;
+
     @ElementCollection(fetch = FetchType.LAZY)
     @CollectionTable(
             name = "user_roles",
             joinColumns = @JoinColumn(name="user_id"))
     @Column(name="role")
     @Enumerated(EnumType.STRING)
-    private Set<Role> roles;
+    private Set<Role> roles=new HashSet<>();
 
     @Override
     @NullMarked
@@ -66,6 +79,11 @@ public class User implements UserDetails {
     public boolean isAccountNonLocked()
     {
         return !isBlocked;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return isEnabled;
     }
 
     @Override

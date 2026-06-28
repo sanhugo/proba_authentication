@@ -30,6 +30,10 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-liquibase'
     implementation 'io.jsonwebtoken:jjwt-api:0.13.0'
     implementation 'org.mapstruct:mapstruct:1.6.3'
+    implementation 'commons-validator:commons-validator:1.10.1'
+    implementation 'cn.hutool:hutool-core:5.8.46'
+    implementation 'org.springframework.boot:spring-boot-starter-mail'
+
     annotationProcessor 'org.mapstruct:mapstruct-processor:1.6.3'
 
     compileOnly 'org.projectlombok:lombok'
