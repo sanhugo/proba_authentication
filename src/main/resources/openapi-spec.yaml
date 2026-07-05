@@ -7,7 +7,7 @@ info:
     email: sanhugo4u@hotmail.com
   version: 0.1.0
 servers:
-  - url: https://localhost:8081/api/auth
+  - url: https://localhost:8081
 
 tags:
   - name: Registration
@@ -22,7 +22,7 @@ tags:
     description: Ручки сброса пароля / Endpoints for changing password
 
 paths:
-  /register:
+  /api/auth/register:
     post:
       tags:
         - Registration
@@ -39,7 +39,7 @@ paths:
           description: Created
         500:
           $ref: "#/components/responses/ErrorResponse"
-  /role/add:
+  /api/auth/role/add:
     post:
       tags:
         - Superadmin
@@ -58,13 +58,12 @@ paths:
           $ref: "#/components/responses/Forbidden"
         500:
           $ref: "#/components/responses/ErrorResponse"
-  /login:
+  /api/auth/login:
     post:
       tags:
         - Authentication
-      summary: Авторизация и получение токена
+      summary: Авторизация и получение токенов и ID сессии
       operationId: login
-      security: []
       requestBody:
         required: true
         content:
@@ -76,38 +75,28 @@ paths:
           description: Вход в систему
           headers:
             Set-Cookie:
-              description: Set both tokens to HTTPOnly Cookie
+              description: Set both tokens to Redis cache, gives Session-ID to HttpOnly Cookie
               schema:
                 type: string
-                example: "refresh_token=etd...; Path=/ HttpOnly; Secure SameSite=Strict; Max-Age=604800"
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Token"
+                example: "_Host-session_id=etd...; Path=/ HttpOnly; Secure SameSite=Strict; Max-Age=604800"
+        404:
+          $ref: "#/components/responses/ErrorResponse"
         500:
           $ref: "#/components/responses/ErrorResponse"
-  /logout:
+  /api/auth/logout:
     post:
       tags:
         - Authentication
       summary: Выход из системы
       operationId: logoutUser
-      security:
-        - CookieAuth: []
+      security: []
       parameters:
-        - name: refresh_token
+        - name: session_id
           in: cookie
           required: true
-          description: JWT refresh token
+          description: session ID
           schema:
             type: string
-            format: jwt
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/Token"
       responses:
         200:
           description: Successfully logged out
@@ -116,41 +105,35 @@ paths:
               description: Cookie Deletion instructions
               schema:
                 type: string
-                example: "refresh_token=; Path=/; Max-Age=0; HttpOnly; Secure; SameSite=Strict"
+                example: "session_id=; Path=/; Max-Age=0; HttpOnly; Secure; SameSite=Strict"
         500:
           $ref: "#/components/responses/ErrorResponse"
-  /refresh:
+  /internal/auth/refresh:
     post:
       tags:
         - Internal_auth
       summary: Вызов для обновления токенов
       operationId: updateTokens
-      security:
-        - CookieAuth: []
+      security: []
       parameters:
-        - name: refresh_token
+        - name: session_id
           in: cookie
           required: true
-          description: JWT refresh token
+          description: Session ID
           schema:
             type: string
-            format: jwt
       responses:
         200:
           description: Токены обновлены успешно / Tokens updated successfully
           headers:
             Set-Cookie:
-              description: Set both tokens to HTTPOnly Cookie
+              description: Set both tokens to Redis cache and set Session-ID to
               schema:
                 type: string
-                example: "refresh_token=etd...; Path=/ HttpOnly; Secure SameSite=Strict; Max-Age=604800"
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Token"
+                example: "_Host-session-ID=etd...; Path=/ HttpOnly; Secure SameSite=Strict; Max-Age=604800"
         500:
           $ref: "#/components/responses/ErrorResponse"
-  /clear_password:
+  /api/auth/clear_password:
     post:
       tags:
         - Password
@@ -161,7 +144,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/ResetEmailDTO"
+              $ref: "#/components/schemas/EmailDTO"
       responses:
         200:
           description: Success
@@ -169,18 +152,37 @@ paths:
           $ref: "#/components/responses/ErrorResponse"
         500:
           $ref: "#/components/responses/ErrorResponse"
-  /change_password:
+  /api/auth/validate:
     post:
       tags:
         - Password
-      summary: Смена пароля (принимает код подтверждения и новый пароль)
+      summary: Принимает код подтверждения для сброса пароля
+      operationId: verifyEmail
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CodeAndEmailDTO"
+      responses:
+        200:
+          description: Code is sent
+        404:
+          $ref: "#/components/responses/ErrorResponse"
+        500:
+          $ref: "#/components/responses/ErrorResponse"
+  /api/auth/change_password:
+    post:
+      tags:
+        - Password
+      summary: Смена пароля (принимает почту и новый пароль)
       operationId: changePassword
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/CodeAndPasswordDTO"
+              $ref: "#/components/schemas/NewPasswordDTO"
       responses:
         200:
           description: Success
@@ -188,7 +190,7 @@ paths:
           $ref: "#/components/responses/ErrorResponse"
         500:
           $ref: "#/components/responses/ErrorResponse"
-  /confirm_registration:
+  /api/auth/confirm_registration:
     post:
       tags:
         - Registration
@@ -207,7 +209,24 @@ paths:
           $ref: "#/components/responses/ErrorResponse"
         500:
           $ref: "#/components/responses/ErrorResponse"
-  /role/remove:
+  /api/auth/resend:
+    post:
+      tags:
+        - Registration
+      summary: Endpoint for generating new confirmation token
+      operationId: resendConfirmation
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EmailDTO"
+      responses:
+        202:
+          description: Confirmation code is sent
+        500:
+          $ref: "#/components/responses/ErrorResponse"
+  /api/auth/role/remove:
     post:
       tags:
         - Superadmin
@@ -246,20 +265,23 @@ components:
           minLength: 8
       required:
         - code
-    CodeAndPasswordDTO:
+
+    CodeAndEmailDTO:
       type: object
-      description: DTO с новым паролем и кодом подтверждения нового пароля
+      description: DTO с почтой и кодом подтверждения сброса пароля
       properties:
         code:
           type: string
-          minLength: 8
-        password:
+          minLength: 6
+          maxLength: 6
+        email:
           type: string
-          minLength: 9
+          format: email
+          minLength: 4
       required:
         - code
-        - password
-    ResetEmailDTO:
+        - email
+    EmailDTO:
       type: object
       description: DTO с почтовым адресом пользователя, для которого нужно сбросить пароль
       properties:
@@ -269,6 +291,17 @@ components:
           minLength: 4
       required:
         - user_email
+    NewPasswordDTO:
+      type: object
+      description: DTO with account email and new password
+      properties:
+        user_email:
+          type: string
+          format: email
+          minLength: 4
+        new_password:
+          type: string
+          minLength: 8
     UserAndRoleDTO:
       type: object
       description: DTO с пользователем и ролью (для удаления/добавления роли)

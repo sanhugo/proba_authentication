@@ -17,8 +17,6 @@ public class RegistrationService {
 
     public void register(UserRegistrationDto body) {
         /*
-
-        Если есть аккаунт - выбрасываем ошибку (что аккаунт с данным логином есть либо есть аккаунт с данным адресом)
         Если нет - передаем данные, в Redis бросаем ключ с логином, в БД пишем данные аккаунта, но с пометкой,
         что аккаунт не активирован; неактивные аккаунты впоследствии вычищаем раз в неделю
         */
@@ -27,6 +25,7 @@ public class RegistrationService {
             throw new UserExistsException("User already exists");
         } else {
             userDetailsService.registerUser(body);
+
         }
     }
 

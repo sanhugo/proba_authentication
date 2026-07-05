@@ -13,7 +13,6 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.proba.authentication.entity.User;
 import ru.proba.authentication.enums.Role;
 import ru.proba.authentication.generated.model.UserRegistrationDto;
-import ru.proba.authentication.mapper.AccessTokenInfoMapper;
 import ru.proba.authentication.repository.UserRepository;
 
 
@@ -22,7 +21,6 @@ import ru.proba.authentication.repository.UserRepository;
 @RequiredArgsConstructor
 public class CustomUserDetailsService implements UserDetailsService {
     UserRepository userRepository;
-    AccessTokenInfoMapper mapper;
     BCryptPasswordEncoder encoder;
 
     @Override

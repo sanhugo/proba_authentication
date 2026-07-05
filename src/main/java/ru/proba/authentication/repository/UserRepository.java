@@ -7,7 +7,6 @@ import org.springframework.data.jpa.repository.Query;
 import ru.proba.authentication.entity.User;
 import ru.proba.authentication.enums.Role;
 import ru.proba.authentication.records.AccessTokenInfo;
-import ru.proba.authentication.records.RefreshTokenInfo;
 
 import java.util.Optional;
 import java.util.Set;
@@ -18,8 +17,6 @@ public interface UserRepository  extends JpaRepository<User,Integer> {
 
     @Query("select u from User u join fetch u.roles where u.login=?1")
     Optional<User> findIDAndRolesByUsername(String username);
-
-    Optional<RefreshTokenInfo> findIdByLogin(String login);
 
     Optional<User> findUserById(UUID id);
 

@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 import ru.proba.authentication.generated.api.RegistrationApi;
 import ru.proba.authentication.generated.model.ApprovalCodeDto;
+import ru.proba.authentication.generated.model.EmailDto;
 import ru.proba.authentication.generated.model.UserRegistrationDto;
 import ru.proba.authentication.service.RegistrationService;
 
@@ -28,5 +29,10 @@ public class RegistrationController implements RegistrationApi {
     public ResponseEntity<Void> confirmRegistration(ApprovalCodeDto body) {
         service.confirm(body);
         return ResponseEntity.ok().build();
+    }
+
+    @Override
+    public ResponseEntity<Void> resendConfirmation(EmailDto body) {
+        return null;
     }
 }

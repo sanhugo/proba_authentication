@@ -34,14 +34,8 @@ public class SuperadminService {
         }
     }
 
-    public boolean roleStrategy(UserAndRoleDto body, boolean isAdd) {
+    public boolean changeRoleSet(UserAndRoleDto body, boolean isAdd) {
         EnteredField ef = getEnteredField(body);
-        boolean t=false;
-        if (isAdd){
-            t=rfs.addRole(body, ef);
-        } else {
-            t=rfs.removeRole(body, ef);
-        }
-        return t;
+        return rfs.fixRoleWithLock(body,ef,isAdd);
     }
 }

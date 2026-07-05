@@ -18,7 +18,7 @@ public class SuperadminController implements SuperadminApi {
 
     @Override
     public ResponseEntity<Void> addRoleToUser(UserAndRoleDto body) {
-        boolean changed = service.roleStrategy(body, true);
+        boolean changed = service.changeRoleSet(body, true);
         if (changed) {
             return ResponseEntity.ok().build();
         } else  {
@@ -28,7 +28,7 @@ public class SuperadminController implements SuperadminApi {
 
     @Override
     public ResponseEntity<Void> removeRole(UserAndRoleDto body) {
-        boolean changed = service.roleStrategy(body, false);
+        boolean changed = service.changeRoleSet(body, false);
         if (changed) {
             return ResponseEntity.ok().build();
         } else  {

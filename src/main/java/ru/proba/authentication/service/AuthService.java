@@ -5,14 +5,14 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.apache.commons.validator.routines.EmailValidator;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import ru.proba.authentication.enums.Role;
 import ru.proba.authentication.exception.NoUserException;
-import ru.proba.authentication.generated.model.Token;
 import ru.proba.authentication.generated.model.UserLoginDto;
+import ru.proba.authentication.records.AccessToken;
 import ru.proba.authentication.records.AccessTokenInfo;
-import ru.proba.authentication.records.RefreshTokenInfo;
-import ru.proba.authentication.records.UserTokens;
+import ru.proba.authentication.records.UserToken;
 import ru.proba.authentication.repository.UserRepository;
 import ru.proba.authentication.tokens.JWTDecoder;
 import ru.proba.authentication.tokens.JWTGenerator;
@@ -28,28 +28,26 @@ public class AuthService {
     UserRepository userRepository;
     JWTGenerator jwtGenerator;
     JWTDecoder jwtDecoder;
+    RedisTemplate<String, String> redisTemplate;
+    RedisService service;
 
-    public void logout(String refreshToken, Token accessToken) {
-
+    public void logout(String session_id) {
+        service.deleteSession(session_id);
     }
 
-    public UserTokens update(String refreshToken) {
-        Claims claims = jwtDecoder.getClaimsFromRefresh(refreshToken);
+    public UserToken update(String session_id) {
+        String accessToken = redisTemplate.opsForHash().get(session_id, "access_token").toString();
+        Claims claims = jwtDecoder.getClaimsFromAccess(accessToken);
         UUID uuid = claims.get("uuid", UUID.class);
         Set<Role> roles = userRepository.findRolesById(uuid);
         AccessTokenInfo ati = new AccessTokenInfo(uuid,roles);
-        RefreshTokenInfo rti = new RefreshTokenInfo(uuid);
-        String accessToken = jwtGenerator.generateAccess(ati);
-        String newRefreshToken = jwtGenerator.generateRefresh(
-                rti,
-                String.valueOf(claims.get("device_id")));
-
-        return new UserTokens(
-                accessToken,
-                newRefreshToken);
+        AccessToken newAccessToken = jwtGenerator.generateAccess(ati);
+        return new UserToken(
+                newAccessToken.token(),
+                newAccessToken.expiration());
     }
 
-    public UserTokens createTokens(UserLoginDto body, String device_id) {
+    public UserToken createToken(UserLoginDto body) {
         EmailValidator validator = EmailValidator.getInstance();
         boolean isEmail = validator.isValid(body.login());
         Optional<AccessTokenInfo> t;
@@ -62,14 +60,10 @@ public class AuthService {
             AccessTokenInfo ati = new AccessTokenInfo(
                     t.get().id(),
                     t.get().roles());
-            String accessToken = jwtGenerator.generateAccess(ati);
-            RefreshTokenInfo rti = new RefreshTokenInfo(
-                    t.get().id()
-            );
-            String refreshToken = jwtGenerator.generateRefresh(rti, device_id);
-            return new UserTokens(
-                    accessToken,
-                    refreshToken);
+            AccessToken accessToken = jwtGenerator.generateAccess(ati);
+            return new UserToken(
+                    accessToken.token(),
+                    accessToken.expiration());
         }
         else throw new NoUserException("User not found");
     }
