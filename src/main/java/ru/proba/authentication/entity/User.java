@@ -14,7 +14,6 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.Table;
 
 import jakarta.persistence.Version;
-import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -40,10 +39,11 @@ import java.util.UUID;
 public class User implements UserDetails {
     @Id
     @Column(columnDefinition = "uuid")
-    private UUID id=UuidCreator.getTimeOrderedEpoch();
+    private final UUID id=UuidCreator.getTimeOrderedEpoch();
 
     @Version //optimistic locking in case roles and passwords don't often change
     @Column(nullable = false)
+    @Builder.Default
     private Integer version = 0;
 
     @Column(unique = true, nullable = false)
@@ -56,9 +56,11 @@ public class User implements UserDetails {
     private String password;
 
     @Column(nullable = false)
+    @Builder.Default
     private boolean isBlocked=false;
 
     @Column(nullable = false)
+    @Builder.Default
     private boolean isEnabled=false;
 
     @ElementCollection(fetch = FetchType.LAZY)
@@ -67,6 +69,7 @@ public class User implements UserDetails {
             joinColumns = @JoinColumn(name="user_id"))
     @Column(name="role")
     @Enumerated(EnumType.STRING)
+    @Builder.Default
     private Set<Role> roles=new HashSet<>();
 
     @Override

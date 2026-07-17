@@ -13,7 +13,7 @@ import ru.proba.authentication.records.UserToken;
 import ru.proba.authentication.service.AuthService;
 import ru.proba.authentication.service.RedisService;
 import ru.proba.authentication.session.SessionIDConfig;
-import ru.proba.authentication.utils.SessionIDGen;
+import ru.proba.authentication.tokens.SecurityTokenGen;
 
 @RestController
 @RequiredArgsConstructor
@@ -23,12 +23,13 @@ public class LoginLogoutController implements AuthenticationApi {
     AuthService service;
     SessionIDConfig config;
     RedisService rs;
+    SecurityTokenGen gen;
 
     @Override
     public ResponseEntity<Void> login(UserLoginDto body) {
-        String session_id = SessionIDGen.generateSessionId();
+        String session_id = gen.generateSessionId();
         UserToken ut = service.createToken(body);
-        rs.saveTokens(ut,session_id);
+        rs.saveToken(ut,session_id);
         ResponseCookie rc = ResponseCookie.from("session_id", session_id)
                 .httpOnly(true)
                 .secure(true)

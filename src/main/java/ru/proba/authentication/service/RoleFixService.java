@@ -34,15 +34,7 @@ public class RoleFixService {
             case LOGIN -> userRepository.findByLogin(body.userData());
             case EMAIL -> userRepository.findByEmail(body.userData());
         };
-        if (u.isPresent()) {
-            // Add distributed lock
-            boolean y = u.map(user -> user.getRoles().add(body.role())).orElse(false);
-
-            return y;
-        }
-        else {
-            return false;
-        }
+        return u.map(user -> user.getRoles().add(body.role())).orElse(false);
     }
 
     @Transactional

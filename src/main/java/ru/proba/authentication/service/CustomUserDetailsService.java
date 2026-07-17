@@ -15,6 +15,8 @@ import ru.proba.authentication.enums.Role;
 import ru.proba.authentication.generated.model.UserRegistrationDto;
 import ru.proba.authentication.repository.UserRepository;
 
+import java.util.UUID;
+
 
 @Service("userDetailsService")
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
@@ -40,7 +42,7 @@ public class CustomUserDetailsService implements UserDetailsService {
     }
 
     @Transactional
-    public void registerUser(UserRegistrationDto body) {
+    public UUID registerUser(UserRegistrationDto body) {
         User u = User.builder()
                 .email(body.email())
                 .login(body.login())
@@ -48,5 +50,6 @@ public class CustomUserDetailsService implements UserDetailsService {
                 .build();
         u.getRoles().add(Role.USER);
         userRepository.save(u);
+        return u.getId();
     }
 }

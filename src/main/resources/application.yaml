@@ -20,6 +20,9 @@ spring:
       port: ${CASH_PORT:6379}
   mail:
     host:
+    port:
+    username:
+    password:
 
 server:
   port: ${SERVER_PORT:8081}
@@ -31,3 +34,8 @@ jwt:
 
 session:
   expiration: 14
+
+email:
+  from:
+  base-u-rL: localhost
+  port: 8081

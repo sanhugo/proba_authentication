@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+option java_package = "ru.proba.authentication.service.internal";
+option java_multiple_files = true;
+
+service InternalService {
+  rpc updateToken (SessionId) returns (Token) {}
+}
+// RU: вызов обновления access-токена и выгрузки напрямую в Gateway
+// EN: call for updating access token and sending immediately to Gateway
+
+message SessionId {
+  string sessionId = 1;
+}
+
+message Token {
+  string accessToken = 1;
+}
+

@@ -25,7 +25,7 @@ public class InternalController implements InternalAuthApi {
     @Override
     public ResponseEntity<Void> updateTokens(String session_id) {
         UserToken tokens = service.update(session_id);
-        redisService.saveTokens(tokens, session_id);
+        redisService.saveToken(tokens, session_id);
         ResponseCookie cookie = ResponseCookie.from("session_id", session_id)
                 .path("/api/")
                 .httpOnly(true)

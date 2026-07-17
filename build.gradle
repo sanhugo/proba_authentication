@@ -3,6 +3,10 @@ plugins {
     id 'org.springframework.boot' version '4.0.6'
     id 'io.spring.dependency-management' version '1.1.7'
     id 'io.openapiprocessor.openapi-processor' version '2026.2'
+    id 'com.google.protobuf' version '0.9.4'
+}
+ext {
+    springGrpcVersion = "1.0.3"
 }
 
 group = 'ru.proba'
@@ -33,6 +37,8 @@ dependencies {
     implementation 'commons-validator:commons-validator:1.10.1'
     implementation 'cn.hutool:hutool-core:5.8.46'
     implementation 'org.springframework.boot:spring-boot-starter-mail'
+    implementation 'org.springframework.grpc:spring-grpc-server-web-spring-boot-starter'
+    implementation 'io.grpc:grpc-services'
 
     annotationProcessor 'org.mapstruct:mapstruct-processor:1.6.3'
 
@@ -67,8 +73,34 @@ sourceSets {
         }
     }
 }
+dependencyManagement {
+    imports {
+        mavenBom "org.springframework.grpc:spring-grpc-dependencies:$springGrpcVersion"
+    }
+}
+
+protobuf {
+    protoc {
+        artifact = "com.google.protobuf:protoc"
+    }
+    plugins {
+        grpc {
+            artifact = "io.grpc:protoc-gen-grpc-java"
+        }
+    }
+    generateProtoTasks {
+        all().each { task ->
+            task.plugins {
+                grpc {
+                    // Optional: uncomment if you face javax/jakarta annotation conflicts
+                    // option 'jakarta_omit'
+                }
+            }
+        }
+    }
+}
 
 //Ensure the code is generated before compilation
 tasks.named("compileJava") {
-    dependsOn "processSpring"
+    dependsOn "processSpring", "generateProto"
 }

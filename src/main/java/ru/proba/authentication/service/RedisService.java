@@ -18,7 +18,7 @@ import java.util.concurrent.TimeUnit;
 public class RedisService {
     RedisTemplate<String, String> redisTemplate;
     SessionIDConfig config;
-    public void saveTokens (UserToken tokens, String session_id) {
+    public void saveToken(UserToken tokens, String session_id) {
         Map<String, String> session_data = new HashMap<>(2);
         session_data.put("access_token", tokens.accessToken());
         session_data.put("access_expire", String.valueOf(tokens.accessTokenExpiration()));
